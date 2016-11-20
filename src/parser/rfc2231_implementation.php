@@ -98,7 +98,7 @@ class ezcMailRfc2231Implementation
                 // syntax: '[charset]'[language]'encoded_string
                 $language = null;
                 $charset = null;
-                if ( $parts[0]['encoding'] == true )
+                if ( reset($parts)['encoding'] == true )
                 {
                     if (!preg_match( "/(\S*)'(\S*)'(.*)/", $parts[0]['value'], $matches))
                     {
@@ -106,13 +106,13 @@ class ezcMailRfc2231Implementation
                             null,
                             'us-ascii',
                             'en-us',
-                            $parts[0]['value']
+                            reset($parts)['value']
                         ];
                     }
 
                     $charset = $matches[1];
                     $language = $matches[2];
-                    $parts[0]['value'] = urldecode( $matches[3] ); // rewrite value: todo: decoding
+                    reset($parts)['value'] = urldecode( $matches[3] ); // rewrite value: todo: decoding
                     $result[1][$paramName] = array( 'value' => $parts[0]['value'] );
                 }
 
