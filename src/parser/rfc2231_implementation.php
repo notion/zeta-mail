@@ -9,9 +9,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@
  * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  * @access private
  */
+use Notion\Domain\Util\Arr;
 
 /**
  * This class parses header fields that conform to RFC2231.
@@ -94,20 +95,30 @@ class ezcMailRfc2231Implementation
             // Now we must go through them all and convert them into the end result
             foreach ( $parameterBuffer as $paramName => $parts )
             {
+                $first_part = Arr::first($parts);
                 // fetch language and encoding if we have it
                 // syntax: '[charset]'[language]'encoded_string
                 $language = null;
                 $charset = null;
-                if ( $parts[0]['encoding'] == true )
+                if ( $first_part['encoding'] == true )
                 {
-                    preg_match( "/(\S*)'(\S*)'(.*)/", $parts[0]['value'], $matches );
+                    if (!preg_match( "/(\S*)'(\S*)'(.*)/", $first_part['value'], $matches))
+                    {
+                        $matches = [
+                            null,
+                            'us-ascii',
+                            'en-us',
+                            $first_part['value']
+                        ];
+                    }
+
                     $charset = $matches[1];
                     $language = $matches[2];
-                    $parts[0]['value'] = urldecode( $matches[3] ); // rewrite value: todo: decoding
-                    $result[1][$paramName] = array( 'value' => $parts[0]['value'] );
+                    $first_part['value'] = urldecode( $matches[3] ); // rewrite value: todo: decoding
+                    $result[1][$paramName] = array( 'value' => $first_part['value'] );
                 }
 
-                $result[1][$paramName] = array( 'value' => $parts[0]['value'] );
+                $result[1][$paramName] = array( 'value' => $first_part['value'] );
                 if ( strlen( $charset ) > 0 )
                 {
                     $result[1][$paramName]['charset'] = $charset;
@@ -170,7 +181,7 @@ class ezcMailRfc2231Implementation
                         {
                             $cd->displayFileName = ezcMailTools::mimeDecode( $cd->displayFileName );
                         }
- 
+
                         if ( isset( $data['language'] ) )
                         {
                             $cd->fileNameLanguage = $data['language'];
