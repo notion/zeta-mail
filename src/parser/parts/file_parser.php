@@ -9,9 +9,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -131,7 +131,9 @@ class ezcMailFileParser extends ezcMailPartParser
         {
             $fileName = trim( $matches[1], '"' );
         }
-        else // default
+
+        // default
+        if (empty($fileName))
         {
             $fileName = "filename";
         }
@@ -253,7 +255,11 @@ class ezcMailFileParser extends ezcMailPartParser
                 $this->dataWritten = true;
             }
 
-            fwrite( $this->fp, $line );
+            try
+            {
+                fwrite( $this->fp, $line );
+            }
+            catch (\Exception $e) {}
         }
     }
 

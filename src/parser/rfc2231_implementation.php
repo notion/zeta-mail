@@ -9,9 +9,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -98,12 +98,21 @@ class ezcMailRfc2231Implementation
                 // syntax: '[charset]'[language]'encoded_string
                 $language = null;
                 $charset = null;
-                if ( $parts[0]['encoding'] == true )
+                if ( reset($parts)['encoding'] == true )
                 {
-                    preg_match( "/(\S*)'(\S*)'(.*)/", $parts[0]['value'], $matches );
+                    if (!preg_match( "/(\S*)'(\S*)'(.*)/", $parts[0]['value'], $matches))
+                    {
+                        $matches = [
+                            null,
+                            'us-ascii',
+                            'en-us',
+                            reset($parts)['value']
+                        ];
+                    }
+
                     $charset = $matches[1];
                     $language = $matches[2];
-                    $parts[0]['value'] = urldecode( $matches[3] ); // rewrite value: todo: decoding
+                    reset($parts)['value'] = urldecode( $matches[3] ); // rewrite value: todo: decoding
                     $result[1][$paramName] = array( 'value' => $parts[0]['value'] );
                 }
 
@@ -170,7 +179,7 @@ class ezcMailRfc2231Implementation
                         {
                             $cd->displayFileName = ezcMailTools::mimeDecode( $cd->displayFileName );
                         }
- 
+
                         if ( isset( $data['language'] ) )
                         {
                             $cd->fileNameLanguage = $data['language'];
